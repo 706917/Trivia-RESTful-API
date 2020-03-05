@@ -13,7 +13,7 @@ def create_app(test_config=None):
     app = Flask(__name__)
     setup_db(app)
     # Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
-    CORS(app, resources={r'*': {"origins": "*"}})
+    CORS(app, resources={r'/api/*': {"origins": "*"}})
 
     # CORS Headers
     @app.after_request
@@ -23,7 +23,7 @@ def create_app(test_config=None):
         return response
 
     # An endpoint to handle GET requests  for all available categories.
-    @app.route('/categories', methods=['GET'])
+    @app.route('/api/categories', methods=['GET'])
     def get_categories():
         # Query DB for all categories
         categories = Support.get_category()
@@ -39,7 +39,7 @@ def create_app(test_config=None):
 
     # An endpoint to handle GET requests for questions,
     #   including pagination (every 10 questions).
-    @app.route('/questions', methods=['GET'])
+    @app.route('/api/questions', methods=['GET'])
     def get_questions():
         selection = Question.query.all()
         questions = Support.paginate_questions(request, selection)
@@ -58,7 +58,7 @@ def create_app(test_config=None):
         })
 
     # An endpoint to handle GET requests for questions, specified by category id
-    @app.route('/categories/<int:category_id>/questions', methods=['GET'])
+    @app.route('/api/categories/<int:category_id>/questions', methods=['GET'])
     def questions_by_category(category_id):
         selection = Question.query.filter(Question.category == category_id).all()
         questions = Support.paginate_questions(request, selection)
@@ -72,7 +72,7 @@ def create_app(test_config=None):
 
     #  An endpoint to DELETE question using a question ID.
 
-    @app.route('/questions/<int:id>', methods=['DELETE'])
+    @app.route('/api/questions/<int:id>', methods=['DELETE'])
     def delete_question(id):
         selection = Question.query.filter(Question.id == id).one_or_none()
         try:
@@ -92,7 +92,7 @@ def create_app(test_config=None):
 
     # An endpoint to POST a new question and to get questions based on a search term.
 
-    @app.route('/questions', methods={'POST'})
+    @app.route('/api/questions', methods={'POST'})
     def add_question():
         post = request.get_json()
 
