@@ -1,18 +1,14 @@
-import os
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-import random
-
 from sqlalchemy import cast, func
-
-from backend.models import setup_db, Question, Category, Support
+from models import setup_db, Question, Support
 
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
     setup_db(app)
-    # Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+    # Set up CORS. Allow '*' for origins.
     CORS(app, resources={r'/api/*': {"origins": "*"}})
 
     # CORS Headers
@@ -37,23 +33,25 @@ def create_app(test_config=None):
             'categories': categories
         })
 
-    # An endpoint to handle GET requests for questions,
-    #   including pagination (every 10 questions).
+    # An endpoint to handle GET requests for questions, including pagination (every 10 questions).
     @app.route('/api/questions', methods=['GET'])
     def get_questions():
+        # Get all questions from db
         selection = Question.query.all()
+        # Paginate the list of questions and get the short list to be listed by the page
         questions = Support.paginate_questions(request, selection)
-        total_questions = len(selection)
 
+        # Get the list of all categories in db since no id provided
         categories = Support.get_category()
 
+        # Abort with 404 error if no questions found in db
         if len(questions) == 0:
             abort(404)
 
         return jsonify({
             'success': True,
             'questions': questions,
-            'total_questions': total_questions,
+            'total_questions': len(selection),
             'categories': categories
         })
 
@@ -71,7 +69,6 @@ def create_app(test_config=None):
         })
 
     #  An endpoint to DELETE question using a question ID.
-
     @app.route('/api/questions/<int:id>', methods=['DELETE'])
     def delete_question(id):
         selection = Question.query.filter(Question.id == id).one_or_none()
@@ -132,12 +129,14 @@ def create_app(test_config=None):
         # Get an id of category
         category = body.get('quiz_category', None)
 
-        # Query database - get all questions with id not in previous_question and shuffle them in random order
+        # Query database - get BaseQuery object with all questions with id not in previous_question
+        # and shuffle them in random order
         questions = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random())
 
         # If specific category provided
-        if category is not None:
-            questions = questions.flter(Question.category == category['id'])
+        if category is not None and int(category['id']) > 0:
+            # Filter BaseQuery object with category id
+                questions = questions.filter(Question.category == category['id'])
 
         # Return False if nothing to show
         if not questions:
@@ -189,11 +188,6 @@ def create_app(test_config=None):
             'error': 422,
             'message': "Well, i understand you and you are right in form, but, i can't get it, sorry, dont hate me"
         }), 422
-
-   
-
-
-
 
     return app
 
