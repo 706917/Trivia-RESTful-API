@@ -123,7 +123,7 @@ def create_app(test_config=None):
             return jsonify({'success': True})
 
     # A POST endpoint to get questions to play the quiz.
-    @app.route('/quizzes', methods=['POST'])
+    @app.route('/api/quizzes', methods=['POST'])
     def play_quiz():
         # request to dictionary
         body = request.get_json()
@@ -133,32 +133,22 @@ def create_app(test_config=None):
         category = body.get('quiz_category', None)
 
         # Query database - get all questions with id not in previous_question and shuffle them in random order
-        selection = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random())
+        questions = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random())
 
         # If specific category provided
         if category is not None:
-            selection = selection.flter(Question.category == category['id'])
-
-        # Get the first element from selection
-        selection = selection.first()
+            questions = questions.flter(Question.category == category['id'])
 
         # Return False if nothing to show
-        if not selection:
+        if not questions:
             return jsonify({
                 'success': False,
                 'question': False
             })
-        else:
-            return jsonify({
-                'success': True,
-                'question': selection
-            })
-
-
-
-
-
-
+        return jsonify({
+            'success': True,
+            'question': questions.first().format()
+        })
 
     return app
 
