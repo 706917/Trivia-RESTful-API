@@ -1,3 +1,13 @@
 
 *.txt
 backend/keys.py
+.idea/misc.xml
+backend/.pytest_cache/*
+backend/__pycache__/models.cpython-37.pyc
+*.pyc
+node_modules/*
+frontend/node_modules/*
+backend/flaskr/__pycache__/*
+backend/flaskr/__pycache__/__init__.cpython-37.pyc
+backend/__pycache__/*
+backend/__pycache__/models.cpython-37.pyc
