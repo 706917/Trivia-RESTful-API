@@ -1,11 +1,9 @@
-import os
 from sqlalchemy import Column, String, Integer
 from flask_sqlalchemy import SQLAlchemy
-from backend.keys import database
+from keys import database
 
 
-database_path = "postgres://keys.user:keys.user_pass@{}/{}".format('localhost:5432', database.name)
-
+database_path = "postgres://{}:{}@{}/{}".format(database['user'], database['user_pass'], 'localhost:5432', database['name'])
 db = SQLAlchemy()
 
 '''
@@ -34,7 +32,7 @@ class Question(db.Model):
     id = Column(Integer, primary_key=True)
     question = Column(String)
     answer = Column(String)
-    category = Column(Integer)
+    category = Column(String)
     difficulty = Column(Integer)
 
     def __init__(self, question, answer, category, difficulty):
@@ -113,7 +111,10 @@ class Support:
 
         return current_questions
 
-    # Get the list of categories
+    # Function to get the list of categories if no specific id provided
+    # and get specific category if id provided
+    # Accepts - int: id
+    # Returns
     def get_category(id=None):
         from flask import abort
         if id:
