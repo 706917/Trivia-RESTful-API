@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import Column, String, Integer, create_engine
+from sqlalchemy import Column, String, Integer, create_engine, cast, VARCHAR
 from flask_sqlalchemy import SQLAlchemy
 import json
 
@@ -34,7 +34,7 @@ class Question(db.Model):
     id = Column(Integer, primary_key=True)
     question = Column(String)
     answer = Column(String)
-    category = Column(String)
+    category = Column(Integer)
     difficulty = Column(Integer)
 
     def __init__(self, question, answer, category, difficulty):
@@ -81,6 +81,52 @@ class Category(db.Model):
 
     def format(self):
         return {
-            'id': self.id,
-            'type': self.type
+            self.id: self.type
+            # 'id': self.id,
+            # 'type': self.type
         }
+
+
+class Support:
+
+    # Functions to return the list of question to show on specified page of listing
+    # Accepts :
+    # - 'request' body to get the value of the 'page' parameter
+    # - 'selection' as object of result of database query
+    # Returns: list of objects to show in specified page
+    def paginate_questions(request, selection):
+        # Constant with the number fof questions to show in one page of listing
+        QUESTIONS_PER_PAGE = 10
+
+        from flask import request
+
+        # retrieve the page value from the request
+        page = request.args.get('page', 1, type=int)
+        # Define start and end indexes of the list of objects to return
+        start = (page-1) * QUESTIONS_PER_PAGE
+        end = start + QUESTIONS_PER_PAGE
+
+        # Format every question-representation we got in the selection object
+        # NOTE : format() function defined in 'Question' class
+        questions = [item.format() for item in selection]
+        current_questions = questions[start:end]
+
+        return current_questions
+
+    # Get the list of categories
+    def get_category(id=None):
+        from flask import abort
+        if id:
+            data = Category.query.filter_by(id=id).order_by(Category.type).all()
+        else:
+            data = Category.query.order_by(Category.type).all()
+
+        if data is None:
+            abort(400)
+
+        categories = {}
+
+        for item in data:
+            categories[item.id] = item.type
+
+        return categories
