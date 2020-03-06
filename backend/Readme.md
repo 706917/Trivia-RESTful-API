@@ -1,1 +1,196 @@
 
+# Full Stack Trivia API Backend
+
+### Getting Started
+Installing Dependencies
+```bash
+Python 3.7
+```
+Follow instructions to install the latest version of python for your platform in the python docs
+
+### Virtual Enviornment
+Create your virtual enviorment for this project
+
+### PIP Dependencies
+Once you have your virtual environment setup and running, install dependencies by naviging to the /backend directory and running:
+
+```bash
+pip install -r requirements.txt
+```
+
+This will install all of the required packages we selected within the requirements.txt file.
+
+### Key Dependencies
+Flask is a lightweight backend microservices framework. Flask is required to handle requests and responses.
+
+SQLAlchemy is the Python SQL toolkit and ORM we'll use handle the lightweight sqlite database.
+
+Flask-CORS is the extension we'll use to handle cross origin requests from our frontend server.
+
+### Database Setup
+With Postgres running, restore a database using the trivia.psql file provided. From the backend folder in terminal run:
+```bash
+psql trivia < trivia.psql
+```
+or windows:
+```bash
+psql -f trivia.psql trivia
+```
+Note: Make sure that you are using the correct owner for the database, else add -U <username>.
+
+# Running the server
+From within the backend directory first ensure you are working using your created virtual environment.
+
+To run the server, execute:
+
+```bash
+export FLASK_APP=flaskr
+export FLASK_ENV=development
+flask run
+```
+or windows:
+```bash
+$env:set FLASK_ENV = "development"
+$env:set FLASK_APP = "flaskr"
+flask run
+```
+Setting the FLASK_ENV variable to development will detect file changes and restart the server automatically.
+
+Setting the FLASK_APP variable to flaskr directs flask to use the flaskr directory and the __init__.py file to find the application.
+
+
+# API Endpoints
+### GET `/api/categories`
+- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+- Request Arguments: None
+- Returns: categories array that contains object with structure { id: category_id, type: category_type }.
+```{
+  "categories": [
+    {
+      "id": 1, 
+      "type": "Science"
+    }, 
+    {
+      "id": 2, 
+      "type": "Art"
+    }, 
+    ...
+  ]
+}
+```
+### GET `/api/questions`
+- Fetches questions in a paginated way split by 10 at a time, it also includes categories (same as /api/categories), current categories of the retrieved questions and the total of questions in the database.
+- Request Arguments: optional: page=int, used for pagination to show the next batch of questions available.
+- Returns: question in an object with parameters: answer, category, difficulty, question.
+```{
+  "categories": [
+    {
+      "id": 1, 
+      "type": "Science"
+    }, 
+    ...
+  ], 
+  "current_category": [
+    3, 
+    4, 
+    5, 
+    6
+  ], 
+  "questions": [
+    {
+      "answer": "Apollo 13", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 2, 
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    }, 
+    ...
+  ], 
+  "success": true, 
+  "total_questions": 19
+}
+```
+### POST `/api/questions`
+Post request used for two things: to generate new questions or search for questions based on a string parameter.
+- Request Arguments: { question:"", answer:"", difficulty:1, category: 1 } or { searchTerm: "" }
+- Returns: if creating a new question, returns a success value along with the id of the newly created question. For search results, it returns a success value along with list of questions retrieved and the amount of questions that match search result.
+New question
+```{
+  'success': true,
+  'created': question_id
+}
+Search
+{
+  'success': true,
+  'questions': [
+      {
+        "answer": "Apollo 13", 
+        "category": 5, 
+        "difficulty": 4, 
+        "id": 2, 
+        "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+      }, 
+      ...
+  ], 
+  'total_questions': 20
+}
+```
+### DELETE `/api/questions/<int:question_id>`
+Endpoint to delete a question with given question id.
+- Request Arguments: None.
+- Returns: returns a success parameter along with the delete id as confirmation.
+```{
+  'success': true,
+  'deleted': question_id,
+}
+```
+
+### GET `/api/categories/<int:category_id>/questions`
+- Fetches a list of questions based on a specific category paginated 10 at a time.
+- Request Arguments: optional: page=int, used for pagination to show the next batch of questions available.
+- Returns: returns list of questions along with a success value, total of questions and the current category id.
+```{
+  'success': true,
+  'questions': [
+      {
+        "answer": "Apollo 13", 
+        "category": 5, 
+        "difficulty": 4, 
+        "id": 2, 
+        "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+      }, 
+      ...
+  ], 
+  'total_questions': 5
+  'current_category': category_id
+}
+```
+### POST `/api/quizzes`
+Endpoint used to create a quiz, it returns a random question based on the to parameters it receives: quiz category (or 0 to match any category) you want questions from and an array of previous questions to filter out.
+- Request Arguments: { previous_questions: [], quiz_category: 1 }
+- Returns: returns a random question filtered by the arguments received. If there is no more questions available (from a category or in general no more questions) it will return false.
+```{
+  'success': true,
+  'question': {
+      "answer": "Apollo 13", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 2, 
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    }
+}
+```
+Fail attempt
+```{
+  'success': false,
+  'question' false
+}
+```
+# Testing
+To run the tests, run
+```bash
+dropdb trivia_test
+createdb trivia_test
+psql trivia_test < trivia.psql
+python test_flaskr.py
+```
